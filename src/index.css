@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Zinc color palette */
+  --color-app-primary-50: #e2efff;  /* Lightest tint (95% lighter) */
+  --color-app-primary-100: #d9ecff;
+  --color-app-primary-200: #b3d6ff;
+  --color-app-primary-300: #80b8ff;
+  --color-app-primary-400: #4d97ff;  /* Medium light */
+  --color-app-primary-500: #0b3f72;  /* Your base color */
+  --color-app-primary-600: #093764;  /* 10% darker */
+  --color-app-primary-700: #072e55;  /* 20% darker */
+  --color-app-primary-800: #052547;  /* 30% darker */
+  --color-app-primary-900: #031c38;  /* Darkest shade */
+}
+
+:root {
+  /* Dark Stone Color Palette */
+  --color-stone-100: #f5f5f4;
+  --color-stone-200: #e7e5e4;
+  --color-stone-300: #d6d3d1;
+  --color-stone-400: #a8a29e;
+  --color-stone-500: #78716c;
+  --color-stone-600: #57534e;
+  --color-stone-700: #44403c;
+  --color-stone-800: #292524;
+  --color-stone-900: #1c1917;
+}
+/* Text Colors */
+.text-primary-100 { color: var(--color-app-primary-100); }
+.text-primary-200 { color: var(--color-app-primary-200); }
+.text-primary-300 { color: var(--color-app-primary-300); }
+.text-primary-400 { color: var(--color-app-primary-400); }
+.text-primary-500 { color: var(--color-app-primary-500); }
+.text-primary-600 { color: var(--color-app-primary-600); }
+.text-primary-700 { color: var(--color-app-primary-700); }
+.text-primary-800 { color: var(--color-app-primary-800); }
+.text-primary-900 { color: var(--color-app-primary-900); }
+
+/* Background Colors */
+.bg-primary-100 { background-color: var(--color-app-primary-100); }
+.bg-primary-200 { background-color: var(--color-app-primary-200); }
+.bg-primary-300 { background-color: var(--color-app-primary-300); }
+.bg-primary-400 { background-color: var(--color-app-primary-400); }
+.bg-primary-500 { background-color: var(--color-app-primary-500); }
+.bg-primary-600 { background-color: var(--color-app-primary-600); }
+.bg-primary-700 { background-color: var(--color-app-primary-700); }
+.bg-primary-800 { background-color: var(--color-app-primary-800); }
+.bg-primary-900 { background-color: var(--color-app-primary-900); }
+
+/* Border Colors */
+.border-primary-100 { border-color: var(--color-app-primary-100); }
+.border-primary-200 { border-color: var(--color-app-primary-200); }
+.border-primary-300 { border-color: var(--color-app-primary-300); }
+.border-primary-400 { border-color: var(--color-app-primary-400); }
+.border-primary-500 { border-color: var(--color-app-primary-500); }
+.border-primary-600 { border-color: var(--color-app-primary-600); }
+.border-primary-700 { border-color: var(--color-app-primary-700); }
+.border-primary-800 { border-color: var(--color-app-primary-800); }
+.border-primary-900 { border-color: var(--color-app-primary-900); }
+
+/* Hover States */
+.hover\:text-primary-500:hover { color: var(--color-app-primary-500); }
+.hover\:bg-primary-500:hover { background-color: var(--color-app-primary-500); }
+/* Add more hover variants as needed */
+
+/* Focus States */
+.focus\:ring-primary-500:focus { 
+  --tw-ring-color: var(--color-app-primary-500);
+  ring-color: var(--tw-ring-color);
+}
+
+@layer utilities {
+  .animate-slideFadeIn {
+    animation: slideFadeIn 0.4s ease-out forwards;
+  }
+
+  .animate-slideFadeOut {
+    animation: slideFadeOut 0.2s ease-in forwards;
+  }
+
+  @keyframes slideFadeIn {
+    from {
+      opacity: 1and and;
+      transform: translateY(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideFadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+  }
+}
