@@ -41,7 +41,7 @@ const AddSale = () => {
   const [billNumberFilter, setBillNumberFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [customerNotFound, setCustomerNotFound] = useState(false);
-
+  const [notes, setNotes] = useState('');
   // State for customer modal
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', address: '', whatsApp: '' });
@@ -65,6 +65,7 @@ const AddSale = () => {
       displayUnit: 'kg',
       bagQuantity: '',
       unitPriceMon: '',
+      unitPriceKG: '',
       unitPriceBag: '',
       unitPricePeti: '',
       totalBags: ''
@@ -144,6 +145,62 @@ const AddSale = () => {
    * This function is called whenever a field in a sale item is changed.
    * It updates the state for that item and recalculates amounts.
    */
+
+  const handleItemChangeBlur = (index, e) => {
+  const { name, value } = e.target;
+  if (name !== 'quantity') return;
+
+  const items = [...saleItems];
+  const item = items[index];
+  const product = item.productDetails;
+
+  let baseValue;
+
+  // ✅ Check if "+" exists and sum the numbers
+  if (value.includes("+")) {
+    baseValue = value
+      .split("+")
+      .map(num => parseFloat(num.trim()) || 0)
+      .reduce((acc, curr) => acc + curr, 0);
+  } else {
+    baseValue = parseFloat(value) || 0;
+  }
+
+  // ✅ Limit by available quantity
+  const available = item.lot?.pendingQuantity || Infinity;
+  if (baseValue > available) baseValue = available;
+
+  // ✅ Update item values
+  item.quantity = baseValue.toString();
+
+  if (product?.unitCategory === 'KG') {
+    item.displayQuantity = (baseValue / 40).toString();
+  } else if (product?.unitCategory === 'bag') {
+    item.bagQuantity = baseValue.toString();
+  } else if (product?.unitCategory === 'tray') {
+    item.displayQuantity = (baseValue / 7).toString();
+  }
+
+  // ✅ Calculate totals
+  const quantity = parseFloat(item.quantity) || 0;
+  const unitPrice = parseFloat(item.unitPrice) || 0;
+  const discount = parseFloat(item.discount) || 0;
+  const total = quantity * unitPrice - discount;
+  const paidOnline = parseFloat(item.paidOnline) || 0;
+  const paidOffline = parseFloat(item.paidOffline) || 0;
+  const due = total - paidOnline - paidOffline;
+
+  item.totalAmount = total.toFixed(2);
+  item.dueAmount = due.toFixed(2);
+
+  // ✅ Update Notes
+  if(value.includes("+")) item.lot && item.lot.latNumber && setNotes(item.lot?.latNumber + " :- " + value);
+
+  // ✅ Update state
+  items[index] = item;
+  setSaleItems(items);
+};
+
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
     const items = [...saleItems];
@@ -151,93 +208,108 @@ const AddSale = () => {
     const product = item.productDetails;
 
     if (name === 'product') {
-        const newProduct = products.find(p => p._id === value);
-        items[index] = {
-          ...saleItems[index],
-          product: value,
-          productDetails: newProduct,
-          lot: { _id: '', latNumber: '', supplier: '', pendingQuantity: 0 },
-          quantity: '',
-          unitPrice: '',
-          discount: '',
-          totalAmount: '',
-          paidOnline: '',
-          paidOffline: '',
-          dueAmount: '',
-          displayQuantity: '',
-          bagQuantity: '',
-          unitPriceMon: '',
-          unitPriceBag: '',
-          unitPricePeti: '',
-          totalBags: ''
-        };
-        setLastList({ index: null, lat: [] });
-      } else if (name === 'totalBags') {
-        items[index].totalBags = value.replace(/[^0-9]/g, '');
-      } else if (!product || !['quantity', 'displayQuantity', 'bagQuantity', 'unitPrice', 'unitPriceMon', 'unitPriceBag', 'unitPricePeti', 'discount', 'paidOnline', 'paidOffline'].includes(name)) {
-        item[name] = value;
-      } else {
-        const available = item.lot.pendingQuantity;
-        let newQuantityInBase = parseFloat(item.quantity) || 0;
-  
-        const enteredValue = parseFloat(value) || 0;
-  
-        if (['quantity', 'displayQuantity', 'bagQuantity'].includes(name)) {
-          let baseValue = 0;
-          if (name === 'quantity') {
-            baseValue = enteredValue;
-          } else if (name === 'displayQuantity') {
-            baseValue = product.unitCategory === 'tray' ? enteredValue * 7 : enteredValue * 40;
-          } else if (name === 'bagQuantity') {
-            baseValue = enteredValue * 50;
-          }
-  
-          if (baseValue > available) {
-            baseValue = available;
-          }
-          newQuantityInBase = baseValue;
-  
-          item.quantity = newQuantityInBase.toString();
-          if (product.unitCategory === 'KG') {
-            item.displayQuantity = (newQuantityInBase / 40).toString();
-          } else if (product.unitCategory === 'bag') {
-            item.bagQuantity = (newQuantityInBase).toString();
-          } else if (product.unitCategory === 'tray') {
-            item.displayQuantity = (newQuantityInBase / 7).toString();
-          }
-  
-          if (value === '') {
-            item.quantity = '';
-            item.displayQuantity = '';
-            item.bagQuantity = '';
-          }
-        } else if (['unitPriceMon', 'unitPriceBag', 'unitPricePeti'].includes(name)) {
-          item[name] = value;
-          const priceValue = parseFloat(value) || 0;
-          if (name === 'unitPriceMon') {
-            item.unitPrice = (priceValue / 40).toFixed(2);
-          } else if (name === 'unitPriceBag') {
-            item.unitPrice = (priceValue).toFixed(2);
-          } else if (name === 'unitPricePeti') {
-            item.unitPrice = (priceValue / 7).toFixed(2);
-          }
-        } else {
-          item[name] = value;
+      const newProduct = products.find(p => p._id === value);
+      items[index] = {
+        ...saleItems[index],
+        product: value,
+        productDetails: newProduct,
+        lot: { _id: '', latNumber: '', supplier: '', pendingQuantity: 0 },
+        quantity: '',
+        unitPrice: '',
+        discount: '',
+        totalAmount: '',
+        paidOnline: '',
+        paidOffline: '',
+        dueAmount: '',
+        displayQuantity: '',
+        bagQuantity: '',
+        unitPriceMon: '',
+        unitPriceBag: '',
+        unitPricePeti: '',
+        totalBags: ''
+      };
+      setLastList({ index: null, lat: [] });
+    } else if (name === 'totalBags') {
+      items[index].totalBags = value.replace(/[^0-9]/g, '');
+    } else if (!product || !['quantity', 'displayQuantity', 'bagQuantity', 'unitPrice', 'unitPriceMon', 'unitPriceKG', 'unitPriceBag', 'unitPricePeti', 'discount', 'paidOnline', 'paidOffline'].includes(name)) {
+      item[name] = value;
+    } else {
+      const available = item.lot.pendingQuantity;
+      let newQuantityInBase = parseFloat(item.quantity) || 0;
+
+      const enteredValue = parseFloat(value) || 0;
+
+      if (['quantity', 'displayQuantity', 'bagQuantity'].includes(name)) {
+        let baseValue;
+        if (name === 'quantity') {
+          let values = value;
+           baseValue = String(values);
+
+         
+        } else if (name === 'displayQuantity') {
+          baseValue = product.unitCategory === 'tray' ? enteredValue * 7 : enteredValue * 40;
+        } else if (name === 'bagQuantity') {
+          baseValue = enteredValue * 50;
         }
+
+        if (baseValue > available) {
+          baseValue = available;
+        }
+        newQuantityInBase = baseValue;
+
+        item.quantity = newQuantityInBase.toString();
+        if (product.unitCategory === 'KG') {
+          item.displayQuantity = (newQuantityInBase / 40).toString();
+        } else if (product.unitCategory === 'bag') {
+          item.bagQuantity = (newQuantityInBase).toString();
+        } else if (product.unitCategory === 'tray') {
+          item.displayQuantity = (newQuantityInBase / 7).toString();
+        }
+
+        if (value === '') {
+          item.quantity = '';
+          item.displayQuantity = '';
+          item.bagQuantity = '';
+        }
+      } else if (['unitPriceMon', 'unitPriceBag', 'unitPricePeti', 'unitPriceKG'].includes(name)) {
+        let calculatedPrice;
+        if (value.includes('+')) {
+            calculatedPrice = value.split('+').reduce((acc, curr) => acc + (parseFloat(curr) || 0), 0);
+            item[name] = calculatedPrice.toString();
+        } else {
+            calculatedPrice = parseFloat(value) || 0;
+            item[name] = value;
+        }
+
+        const priceValue = calculatedPrice;
+        if (name === 'unitPriceMon') {
+          item.unitPrice = (priceValue / 40).toFixed(2);
+          item.unitPriceKG = (priceValue / 40).toFixed(2);
+        } else if (name === 'unitPriceBag') {
+          item.unitPrice = (priceValue).toFixed(2);
+        } else if (name === 'unitPricePeti') {
+          item.unitPrice = (priceValue / 7).toFixed(2);
+        } else if (name === 'unitPriceKG') {
+          item.unitPrice = priceValue.toFixed(2);
+          item.unitPriceMon = (priceValue * 40).toFixed(2);
+        }
+      } else {
+        item[name] = value;
       }
-  
-      const quantity = parseFloat(items[index].quantity) || 0;
-      const unitPrice = parseFloat(items[index].unitPrice) || 0;
-      const discount = parseFloat(items[index].discount) || 0;
-      const total = quantity * unitPrice - discount;
-      const paidOnline = parseFloat(items[index].paidOnline) || 0;
-      const paidOffline = parseFloat(items[index].paidOffline) || 0;
-      const due = total - paidOnline - paidOffline;
-  
-      items[index].totalAmount = total.toFixed(2);
-      items[index].dueAmount = due.toFixed(2);
-  
-      setSaleItems(items);
+    }
+
+    const quantity = parseFloat(items[index].quantity) || 0;
+    const unitPrice = parseFloat(items[index].unitPrice) || 0;
+    const discount = parseFloat(items[index].discount) || 0;
+    const total = quantity * unitPrice - discount;
+    const paidOnline = parseFloat(items[index].paidOnline) || 0;
+    const paidOffline = parseFloat(items[index].paidOffline) || 0;
+    const due = total - paidOnline - paidOffline;
+
+    items[index].totalAmount = total.toFixed(2);
+    items[index].dueAmount = due.toFixed(2);
+
+    setSaleItems(items);
   };
 
   /**
@@ -253,7 +325,7 @@ const AddSale = () => {
         quantity: '', unitPrice: '', discount: '', totalAmount: '',
         paidOnline: '', paidOffline: '', dueAmount: '',
         displayQuantity: '', displayUnit: 'kg', bagQuantity: '',
-        unitPriceMon: '', unitPriceBag: '', unitPricePeti: '',
+        unitPriceMon: '', unitPriceKG: '', unitPriceBag: '', unitPricePeti: '',
         totalBags: ''
       },
     ]);
@@ -291,6 +363,7 @@ const AddSale = () => {
           supplier: item.supplier?.name || 'N/A',
           pendingBags: item.pendingBag,
           pendingQuantity: item.pendingQuantity,
+          unit: item.unit,
           date: item.purchase?.purchaseDate,
         }));
 
@@ -322,6 +395,7 @@ const AddSale = () => {
       displayQuantity: '',
       bagQuantity: '',
       unitPriceMon: '',
+      unitPriceKG: '',
       unitPriceBag: '',
       unitPricePeti: '',
       totalBags: ''
@@ -357,11 +431,13 @@ const AddSale = () => {
       latNumber: selectedLot.latNumber,
       supplier: selectedLot.supplier,
       pendingQuantity: pendingQuantity,
+      pendingBags: selectedLot.pendingBags,
     };
 
     items[index].quantity = '';
     items[index].unitPrice = '';
     items[index].unitPriceMon = '';
+    items[index].unitPriceKG = '';
     items[index].unitPriceBag = '';
     items[index].unitPricePeti = '';
     items[index].displayQuantity = '';
@@ -382,6 +458,7 @@ const AddSale = () => {
     items[index].bagQuantity = '';
     items[index].unitPrice = '';
     items[index].unitPriceMon = '';
+    items[index].unitPriceKG = '';
     items[index].unitPriceBag = '';
     items[index].unitPricePeti = '';
     setSaleItems(items);
@@ -466,6 +543,7 @@ const AddSale = () => {
         dueAmount: Number(item.dueAmount),
         totalBags: Number(item.totalBags),
       })),
+      notes: notes,
       saleDate: new Date().toISOString(),
       createdBy: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user'))._id : '',
       discountTotal: Number(discountTotal),
@@ -475,8 +553,9 @@ const AddSale = () => {
       SaleDue: totalDue,
       totalDue: customerTotalDue + totalDue,
     };
-   
+
     // Dispatch the action to create the sale
+   
     const resultAction = await dispatch(createSale(saleData));
     if (createSale.fulfilled.match(resultAction)) {
       const newSale = resultAction.payload;
@@ -492,7 +571,10 @@ const AddSale = () => {
           amount: item.totalAmount,
         })),
         total: grandTotal,
-        netAmount: grandTotal - discountTotal,
+        
+        notes: notes,
+        customerTotalDue: customerTotalDue,
+        totalDue: customerTotalDue + totalDue,
       };
       setBillData(billData);
       setShowReceipt(true);
@@ -551,6 +633,7 @@ const AddSale = () => {
                     products={products}
                     lastList={lastList}
                     saleItems={saleItems}
+                    handleItemChangeBlur={handleItemChangeBlur}
                     handleItemChange={handleItemChange}
                     handleProductChange={handleProductChange}
                     handleLotClick={handleLotClick}
@@ -577,7 +660,7 @@ const AddSale = () => {
               {saleItems.length >= 1 && (
                 <div className="bg-white rounded-lg shadow-md p-4">
                   <Totals
-                    grandTotal={grandTotal}
+                   
                     discountTotal={discountTotal}
                     setDiscountTotal={setDiscountTotal}
                     totalPayment={totalPayment}
@@ -589,6 +672,11 @@ const AddSale = () => {
               )}
               <div className="bg-white rounded-lg shadow-md p-4">
                 <DagImageUpload dagImage={dagImage} handleDagImageChange={handleDagImageChange} />
+
+                <div>
+                  <label>Notes</label>
+                  <textarea className='w-full border shadow-md rounded p-1 px-2 text-sm text-zinc-600' rows="6" placeholder='Notes' value={notes} onChange={(e) => setNotes(e.target.value)}  >   </textarea>
+                </div>
               </div>
               <div className="bg-white rounded-lg shadow-md p-4">
                 <div className="flex justify-end gap-3">
@@ -625,7 +713,7 @@ const AddSale = () => {
       {showReceipt && billData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-4 rounded-lg">
-            <SalePrintPage billData={billData} />
+            <SalePrintPage billData={billData}  />
             <button
               onClick={() => {
                 setShowReceipt(false);

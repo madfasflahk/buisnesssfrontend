@@ -10,7 +10,7 @@ import React from 'react';
  */
 const Totals = ({
   // Data and state from the parent component
-  grandTotal,
+  
   discountTotal,
   totalPayment,
   totalDue,
@@ -46,16 +46,16 @@ const Totals = ({
         </div>
         <hr className="my-2"/>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Grand Total</span>
-          <span className="text-md font-bold text-gray-800">₹ {(grandTotal - discountTotal).toFixed(2)}</span>
+          <span className="text-sm font-medium text-gray-600">Old value</span>
+          <span className="text-md font-bold text-gray-800">₹ {(customerTotalDue).toFixed(2)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-red-600">Sale Due</span>
-          <span className="text-md font-bold text-red-800">₹ {(totalDue - discountTotal).toFixed(2)}</span>
+          <span className="text-md font-bold text-red-800">₹ {(totalDue).toFixed(2)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-red-600">Total Due</span>
-          <span className="text-md font-bold text-red-800">₹ {(customerTotalDue + (totalDue - discountTotal)).toFixed(2)}</span>
+          <span className="text-md font-bold text-red-800">₹ {Number(customerTotalDue + Number(totalDue)).toFixed(2)}</span>
         </div>
       </div>
     </div>

@@ -70,19 +70,34 @@ const Receipt = React.forwardRef(({ billData }, ref) => {
 
       {/* Totals */}
       <div className="flex justify-between text-[11px] border-t border-black pt-1">
-        <span>Total</span>
-        <span>{formatNumber(billData.total)}</span>
+        <span>Old Due</span>
+        <span>{formatNumber(billData.customerTotalDue)}</span>
       </div>
       <div className="flex justify-between text-[11px]">
-        <span>Net Amount</span>
-        <span className="font-bold">{formatNumber(billData.netAmount)}</span>
+        <span>Recent Bill</span>
+        <span>{formatNumber(billData.total)}</span>
       </div>
+      
+      <div className="flex justify-between text-[11px]">
+        <span>Total Due</span>
+        <span className="font-bold">{formatNumber(billData.totalDue)}</span>
+      </div>
+
+      {/* Notes */}
+      {billData.notes && (
+        <div className="mt-2 text-[10px] border-t border-black pt-1">
+          <p className="font-bold">Notes:</p>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: billData.notes.replace(/\n/g, '<br />'),
+            }}
+          />
+        </div>
+      )}
 
       {/* Terms */}
       <div className="mt-2 text-[9px] text-gray-600 border-t border-black pt-1">
         <p>No discount will be given on assessed value.</p>
-        <p>Note: किसी भी बिल/चालान के मूल्य पर कोई छूट नहीं दी जाएगी।</p>
-        <p className="italic">ध्यान दें: बिल काटने के बाद मूल्य उपर/नीचे (कम/ज्यादा) किया नहीं जाएगा।</p>
       </div>
 
       {/* Footer */}
@@ -94,7 +109,7 @@ const Receipt = React.forwardRef(({ billData }, ref) => {
   );
 });
 
-export default function SalePrintPage({ billData }) {
+export default function SalePrintPage({ billData,notes }) {
   const componentRef = useRef();
 
   const handlePrint = useReactToPrint({

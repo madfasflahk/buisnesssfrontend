@@ -110,7 +110,7 @@ const Purchase = () => {
         return `₹${formatNumber(price)}`;
     }
   };
-
+ 
   // Calculate totals
   const totalPaid = purchases.reduce((acc, purchase) =>
     acc + (purchase.paidAmount || []).reduce((sum, p) => sum + p.amount, 0), 0);
