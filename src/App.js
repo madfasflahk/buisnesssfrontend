@@ -16,6 +16,7 @@ import LoginPage from './pages/LoginPage';
 import AddSale from './pages/AddSale';
 import CustomerSales from './pages/CustomerSales';
 import CustomareSaleList from './pages/CustomareSaleList';
+import ReturnSale from './pages/ReturnSale'; // Import the new component
 
 const PrivateRoute = ({ children }) => {
   const user = localStorage.getItem('user');
@@ -33,6 +34,7 @@ function App() {
         <Route path="/customers" element={<PrivateRoute><Customer /></PrivateRoute>} />
         <Route path="/sales" element={<PrivateRoute><Sale /></PrivateRoute>} />
         <Route path="/sales/new" element={<PrivateRoute><AddSale /></PrivateRoute>} />
+        <Route path="/sales/:id/return" element={<PrivateRoute><ReturnSale /></PrivateRoute>} /> {/* New route for returning/editing a sale */}
         <Route path="/sales/customer/:customerId" element={<PrivateRoute><CustomerSales /></PrivateRoute>} />
         <Route path="/purchases" element={<PrivateRoute><Purchase /></PrivateRoute>} />
         <Route path="/returns" element={<PrivateRoute><Return /></PrivateRoute>} />

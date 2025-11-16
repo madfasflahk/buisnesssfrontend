@@ -122,8 +122,8 @@ const Sale = () => {
     setFilterEndDate('');
     dispatch(getAllSales({}));
   };
-  const handleSaleJourney = () => {
-
+  const handleSaleJourney = (saleId) => {
+    navigate(`/sales/${saleId}/return`);
   }
 
   console.log("saleList", saleList);
@@ -214,7 +214,7 @@ const Sale = () => {
         )
       },
       {
-        Header: () => <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCogs /> Actions</div>,
+        Header: () => <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCogs /> Return</div>,
         accessor: 'actions',
         Cell: ({ row }) => (
           <div className="flex gap-3">
@@ -227,7 +227,7 @@ const Sale = () => {
         width: 120
       }
     ],
-    [products]
+    [products, handleSaleJourney]
   );
 
   return (

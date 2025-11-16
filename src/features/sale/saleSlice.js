@@ -106,6 +106,7 @@ export const getSalesByCustomer = createAsyncThunk(
 
 const initialState = {
   data: [],
+  saleDetails: null,
   salesByCustomer: [],
   loading: false,
   error: null,
@@ -144,7 +145,7 @@ const saleSlice = createSlice({
       })
       .addCase(getSaleById.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = [action.payload];
+        state.saleDetails = action.payload;
       })
       .addCase(getSaleById.rejected, (state, action) => {
         state.loading = false;
