@@ -67,6 +67,22 @@ const ReturnSale = () => {
     setFormData({ ...formData, products: updated });
   };
 
+  const handleMonChange = (index, value) => {
+    const mon = Number(value);
+    if (isNaN(mon)) {
+      handleQuantityChange(index, '');
+      return;
+    }
+    const kg = mon * 40;
+    handleQuantityChange(index, kg.toString());
+  };
+
+  const handleBagChange = (index, value) => {
+    const updated = [...formData.products];
+    updated[index].totalBag = value;
+    setFormData({ ...formData, products: updated });
+  };
+
   // 🔥 Recalculate summary values
   useEffect(() => {
     const totalAmount = formData.products.reduce((s, p) => s + p.totalAmount, 0);
@@ -159,7 +175,7 @@ const ReturnSale = () => {
 
       {/* Quantity Editable */}
       <div>
-        <label>Quantity (Editable)</label>
+        <label>Quantity (KG)</label>
         <input
           type="number"
           value={item.quantity}
@@ -167,6 +183,20 @@ const ReturnSale = () => {
           className="w-full border px-3 py-2 rounded"
         />
       </div>
+
+      {/* Mon Input */}
+      {latData?.unit === 'KG' && (
+      <div>
+          <label>Quantity (Mon)</label>
+          <input
+              type="number"
+              value={item.quantity > 0 ? item.quantity / 40 : ''}
+              onChange={(e) => handleMonChange(index, e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="1 Mon = 40 KG"
+          />
+      </div>
+      )}
 
       {/* Unit Price */}
       <div>
@@ -185,8 +215,8 @@ const ReturnSale = () => {
         <input
           type="text"
           value={item.totalBag}
-          disabled
-          className="w-full border px-3 py-2 bg-gray-100 rounded"
+          onChange={(e) => handleBagChange(index, e.target.value)}
+          className="w-full border px-3 py-2 rounded"
         />
       </div>
 
