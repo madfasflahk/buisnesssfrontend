@@ -23,12 +23,12 @@ const ReturnSale = () => {
     totalDue: 0,
   });
 
-  // 🔹 Fetch sale on load
+  // Fetch sale
   useEffect(() => {
     if (saleId) dispatch(getSaleById(saleId));
   }, [dispatch, saleId]);
-  console.log("saleDetails in return sale", saleDetails);
-  // 🔹 Set form values once saleDetails come
+
+  // Set initial formData
   useEffect(() => {
     if (!saleDetails) return;
 
@@ -36,7 +36,10 @@ const ReturnSale = () => {
       customer: saleDetails.customer?._id,
       products: saleDetails.products.map((p) => ({
         product: p.product?._id,
+        latId: p.latId?._id, // 🔥 MUST SEND TO BACKEND
+        originalQty: p.quantity, // 🔥 Needed to compute returned quantity
         quantity: p.quantity,
+        returnedQty: 0, // auto calculate
         unitPrice: p.unitPrice,
         discount: p.discount,
         totalAmount: p.totalAmount,
@@ -46,7 +49,7 @@ const ReturnSale = () => {
         totalBag: p.totalBag,
       })),
       notes: saleDetails.notes,
-      saleDate: saleDetails.saleDate?.split("T")[0],
+      saleDate: saleDetails.saleDate?.split('T')[0],
       discountTotal: saleDetails.discountTotal,
       totalAmount: saleDetails.totalAmount,
       payment: saleDetails.paidAmount,
@@ -55,35 +58,40 @@ const ReturnSale = () => {
     });
   }, [saleDetails]);
 
-  // 🔥 Only Quantity Change Allowed
+  // QUANTITY CHANGE
   const handleQuantityChange = (index, value) => {
     const updated = [...formData.products];
     const qty = Number(value);
 
+    const originalQty = updated[index].originalQty;
+    const returnedQty = originalQty - qty > 0 ? originalQty - qty : 0;
+
     updated[index].quantity = qty;
+    updated[index].returnedQty = returnedQty;
+
     updated[index].totalAmount = qty * updated[index].unitPrice;
-    updated[index].dueAmount = updated[index].totalAmount; // because paid = 0
+    updated[index].dueAmount = updated[index].totalAmount;
 
     setFormData({ ...formData, products: updated });
   };
 
-  const handleMonChange = (index, value) => {
-    const mon = Number(value);
-    if (isNaN(mon)) {
-      handleQuantityChange(index, '');
-      return;
-    }
+  // MON → KG
+  const handleMonChange = (index, monValue) => {
+    const mon = Number(monValue);
+    if (isNaN(mon)) return;
+
     const kg = mon * 40;
-    handleQuantityChange(index, kg.toString());
+    handleQuantityChange(index, kg);
   };
 
+  // BAG CHANGE
   const handleBagChange = (index, value) => {
     const updated = [...formData.products];
     updated[index].totalBag = value;
     setFormData({ ...formData, products: updated });
   };
 
-  // 🔥 Recalculate summary values
+  // RECALCULATE totals
   useEffect(() => {
     const totalAmount = formData.products.reduce((s, p) => s + p.totalAmount, 0);
     const totalDue = formData.products.reduce((s, p) => s + p.dueAmount, 0);
@@ -95,6 +103,7 @@ const ReturnSale = () => {
     }));
   }, [formData.products]);
 
+  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
     await dispatch(updateSaleById({ id: saleId, saleData: formData }));
@@ -104,19 +113,21 @@ const ReturnSale = () => {
   if (loading) return <p className="text-center py-8">Loading...</p>;
   if (error) return <p className="text-center text-red-600 py-8">{error}</p>;
   if (!saleDetails) return <p className="text-center py-8">No sale found</p>;
-  console.log("formData", formData.products);
+
   return (
     <div className="container mx-auto p-4 bg-white shadow-md rounded-lg">
+
+      {/* Page Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Return / Edit Sale</h1>
-        <button
-          onClick={() => navigate('/sales')}
+        <button onClick={() => navigate('/sales')}
           className="flex items-center gap-2 bg-gray-200 px-4 py-2 rounded-lg"
         >
           <FaArrowLeft /> Back
         </button>
       </div>
 
+      {/* FORM */}
       <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* Customer Info */}
@@ -127,7 +138,7 @@ const ReturnSale = () => {
               type="text"
               value={saleDetails.customer?.name}
               disabled
-              className="w-full border px-3 py-2 rounded bg-gray-100"
+              className="w-full border px-3 py-2 bg-gray-100"
             />
           </div>
 
@@ -137,124 +148,127 @@ const ReturnSale = () => {
               type="date"
               value={formData.saleDate}
               disabled
-              className="w-full border px-3 py-2 rounded bg-gray-100"
+              className="w-full border px-3 py-2 bg-gray-100"
             />
           </div>
         </div>
 
-        {/* Products */}
+        {/* PRODUCTS */}
         <div className="border p-4 rounded-lg bg-gray-50 space-y-4">
           <h2 className="text-xl font-semibold">Products</h2>
 
           {formData.products.map((item, index) => {
-  const latData = saleDetails.products[index].latId;
+            const latData = saleDetails.products[index].latId;
+            console.log('LAT DATA:', latData,item);
+            return (
+              <div key={index} className="border-b pb-4 mb-4">
 
-  return (
-    <div>
+                {/* GRID ROW */}
+                <div className="grid grid-cols-2 md:grid-cols-8 gap-4">
 
-    
-    <div
-      key={index}
-      className="grid grid-cols-2 md:grid-cols-8 gap-4 border-b pb-4"
-    >
-     
-      <div>
-        <label className='font-bold'>Product</label>
-        <input
-          type="text"
-          value={saleDetails.products[index].product?.name}
-          disabled
-          className="w-full border px-3 py-2 bg-gray-100 rounded font-bold"
-        />
-        
-      </div>
+                  {/* Product Name */}
+                  <div>
+                    <label className="font-bold">Product</label>
+                    <input
+                      type="text"
+                      value={saleDetails.products[index].product?.name}
+                      disabled
+                      className="w-full border px-3 py-2 bg-gray-100 font-bold"
+                    />
+                  </div>
 
-      {/* Pending Quantity */}
-      
+                  {/* Quantity KG */}
+                  <div>
+                    <label>Quantity (KG)</label>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        handleQuantityChange(index, e.target.value)
+                      }
+                      className="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
 
+                  {/* Quantity MON */}
+                  {latData?.unit === 'KG' && (
+                    <div>
+                      <label>Quantity (Mon)</label>
+                      <input
+                        type="number"
+                        value={item.quantity ? item.quantity / 40 : ''}
+                        onChange={(e) => handleMonChange(index, e.target.value)}
+                        className="w-full border px-3 py-2 rounded"
+                        placeholder="1 Mon = 40 KG"
+                      />
+                    </div>
+                  )}
 
-      {/* Quantity Editable */}
-      <div>
-        <label>Quantity (KG)</label>
-        <input
-          type="number"
-          value={item.quantity}
-          onChange={(e) => handleQuantityChange(index, e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
-      </div>
+                  {/* Unit Price */}
+                  <div>
+                    <label>Unit Price</label>
+                    <input
+                      type="number"
+                      value={item.unitPrice}
+                      disabled
+                      className="w-full border px-3 py-2 bg-gray-100"
+                    />
+                  </div>
 
-      {/* Mon Input */}
-      {latData?.unit === 'KG' && (
-      <div>
-          <label>Quantity (Mon)</label>
-          <input
-              type="number"
-              value={item.quantity > 0 ? item.quantity / 40 : ''}
-              onChange={(e) => handleMonChange(index, e.target.value)}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="1 Mon = 40 KG"
-          />
-      </div>
-      )}
+                  {/* Bags */}
+                  <div>
+                    <label>Total Bags</label>
+                    <input
+                      type="text"
+                      value={item.totalBag}
+                      onChange={(e) => handleBagChange(index, e.target.value)}
+                      className="w-full border px-3 py-2 rounded"
+                    />
+                  </div>
 
-      {/* Unit Price */}
-      <div>
-        <label>Unit Price</label>
-        <input
-          type="number"
-          value={item.unitPrice}
-          disabled
-          className="w-full border px-3 py-2 bg-gray-100 rounded"
-        />
-      </div>
+                  {/* Total Amount */}
+                  <div>
+                    <label>Total Amount</label>
+                    <input
+                      type="number"
+                      value={item.totalAmount}
+                      disabled
+                      className="w-full border px-3 py-2 bg-gray-100"
+                    />
+                  </div>
 
-      {/* Total Bags */}
-      <div>
-        <label>Total Bags</label>
-        <input
-          type="text"
-          value={item.totalBag}
-          onChange={(e) => handleBagChange(index, e.target.value)}
-          className="w-full border px-3 py-2 rounded"
-        />
-      </div>
+                  {/* Due Amount */}
+                  <div>
+                    <label>Due Amount</label>
+                    <input
+                      type="number"
+                      value={item.dueAmount}
+                      disabled
+                      className="w-full border px-3 py-2 bg-gray-100"
+                    />
+                  </div>
+                </div>
 
-      {/* Total Amount */}
-      <div>
-        <label>Total Amount</label>
-        <input
-          type="number"
-          value={item.totalAmount}
-          disabled
-          className="w-full border px-3 py-2 bg-gray-100 rounded"
-        />
-      </div>
+                {/* LOT INFO */}
+                <div className="bg-red-100 px-2 py-1 mt-2 rounded">
+                  {latData?.latNumber && (
+                    <p className="text-sm italic">
+                      Lot: {latData.latNumber}, Pending: {latData.pendingQuantity} KG (
+                      {latData.pendingQuantity / 40} mon), Bags: {latData.pendingBag}
+                    </p>
+                  )}
+                </div>
 
-      {/* Due Amount */}
-      <div>
-        <label>Due Amount</label>
-        <input
-          type="number"
-          value={item.dueAmount}
-          disabled
-          className="w-full border px-3 py-2 bg-gray-100 rounded"
-        />
-      </div>
-    </div>
-    <div className='bg-red-200 px-2 py-1'>
-
-    {latData?.latNumber && (
-      <p className="text-sm italic text-gray-600 mt-1">Lot: {latData.latNumber} , Pending: {latData?.pendingQuantity}{latData.unit==='KG'?` kg  ${latData?.pendingQuantity/40} mon   `:''} {latData?.pendingBag} {latData.unit==='KG'?'Bags':''}  </p>
-    )}
-    </div>
+                {/* RETURN QTY DISPLAY */}
+                <p className="text-blue-600 text-sm mt-1 font-semibold">
+                  Returned Qty: {item.returnedQty} KG
+                </p>
+              </div>
+            );
+          })}
         </div>
-  );
-})}
 
-        </div>
-
-        {/* Summary */}
+        {/* SUMMARY */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label>Total Amount</label>
@@ -277,16 +291,17 @@ const ReturnSale = () => {
           </div>
         </div>
 
-        {/* Notes */}
+        {/* NOTES */}
         <div>
           <label>Notes</label>
           <textarea
             value={formData.notes}
             disabled
-            className="w-full border px-3 py-2 bg-gray-100 rounded"
+            className="w-full border px-3 py-2 bg-gray-100"
           ></textarea>
         </div>
 
+        {/* SUBMIT */}
         <button
           type="submit"
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
