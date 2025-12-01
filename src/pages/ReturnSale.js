@@ -261,7 +261,7 @@ const ReturnSale = () => {
 
                 {/* RETURN QTY DISPLAY */}
                 <p className="text-blue-600 text-sm mt-1 font-semibold">
-                  Returned Qty: {item.returnedQty} KG
+                  Returned Qty: {item.originalQty} KG
                 </p>
               </div>
             );
