@@ -25,17 +25,17 @@ const formatNumber = (num) => {
 const handleDecimalInput = (value) => {
   // Allow empty value
   if (value === "") return value;
-  
+
   // Allow numbers with optional decimal point
   if (/^\d*\.?\d*$/.test(value)) {
     // If the value ends with a decimal point, keep it as is
-    if (value.endsWith('.')) return value;
-    
+    if (value.endsWith(".")) return value;
+
     // Otherwise, parse as float to remove unnecessary decimal points
     const numValue = parseFloat(value);
     return isNaN(numValue) ? "" : numValue.toString();
   }
-  
+
   // Return previous value if invalid
   return value;
 };
@@ -72,7 +72,7 @@ const PurchaseModal = ({
   const [priceInputs, setPriceInputs] = useState({
     pricePerMon: "",
     pricePerPati: "",
-    pricePerBag: ""
+    pricePerBag: "",
   });
 
   useEffect(() => {
@@ -215,8 +215,7 @@ const PurchaseModal = ({
       totalAmount = quantityInMainUnit * price;
     }
 
-    
-    const dueAmount = totalAmount - (newPurchase.paidAmount);
+    const dueAmount = totalAmount - newPurchase.paidAmount;
 
     if (newPurchase.totalAmount !== formatNumber(totalAmount)) {
       handleInputChange({
@@ -240,17 +239,17 @@ const PurchaseModal = ({
   const handlePriceInputChange = (e, unitType) => {
     const { value } = e.target;
     const processedValue = handleDecimalInput(value);
-    
+
     // Update the input state
-    setPriceInputs(prev => ({
+    setPriceInputs((prev) => ({
       ...prev,
-      [unitType]: processedValue
+      [unitType]: processedValue,
     }));
-    
+
     // Calculate the actual price per unit
     if (processedValue && processedValue !== ".") {
       let pricePerUnit;
-      
+
       switch (unitType) {
         case "pricePerMon":
           pricePerUnit = parseFloat(processedValue) / KG_PER_MON;
@@ -264,7 +263,7 @@ const PurchaseModal = ({
         default:
           pricePerUnit = parseFloat(processedValue);
       }
-      
+
       handleInputChange({
         target: { name: "Price_PerUnit", value: pricePerUnit },
       });
@@ -286,14 +285,14 @@ const PurchaseModal = ({
       pati: "",
       bag: "",
     });
-    
+
     // Reset price inputs
     setPriceInputs({
       pricePerMon: "",
       pricePerPati: "",
-      pricePerBag: ""
+      pricePerBag: "",
     });
-    
+
     handleInputChange({
       target: {
         name: "products",
@@ -379,7 +378,7 @@ const PurchaseModal = ({
         return "Price Per Kg";
       case "Tray":
         return "Price Per Tray";
-      case "Bag":
+      case "bag":
         return "Price Per Bag";
       default:
         return "Price Per Unit";
@@ -599,7 +598,7 @@ const PurchaseModal = ({
                       Quantity (pati)
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       step="0.01"
                       value={convertedValues.pati}
                       onChange={(e) =>
@@ -617,7 +616,11 @@ const PurchaseModal = ({
                     <input
                       type="text"
                       value={priceInputs.pricePerPati}
-                      onChange={(e) => handlePriceInputChange(e, "pricePerPati")}
+                      onChange={(e) =>
+                        
+                        handlePriceInputChange(e, "pricePerPati")
+                      }
+                      
                       placeholder="Price per pati"
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
@@ -633,12 +636,20 @@ const PurchaseModal = ({
                       Quantity (bag)
                     </label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={convertedValues.bag}
-                      onChange={(e) =>
-                        handleUnitConversion("bag", e.target.value)
-                      }
+                      // onChange={(e) =>
+                      //   handleUnitConversion("bag", e.target.value)
+                      // }
+                      onChange={(e) => {
+                        const val = e.target.value;
+
+                        // allow only numbers + one decimal
+                        if (/^\d*\.?\d*$/.test(val)) {
+                          handleUnitConversion("bag", val);
+                        }
+                      }}
                       placeholder="Quantity in bag"
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
@@ -649,19 +660,24 @@ const PurchaseModal = ({
                       Quantity (kg)
                     </label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={convertedValues.kg}
-                      onChange={(e) =>
-                        handleUnitConversion("kg", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+
+                        // allow only numbers + one decimal
+                        if (/^\d*\.?\d*$/.test(val)) {
+                          handleUnitConversion("kg", val);
+                        }
+                      }}
                       placeholder="Quantity in kg"
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
                     />
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Additional Bags
                     </label>
@@ -674,9 +690,9 @@ const PurchaseModal = ({
                       className="w-full border px-3 py-2 rounded bg-gray-100"
                       disabled
                     />
-                  </div>
-                  
-                  <div className="relative">
+                  </div> */}
+
+                  {/* <div className="relative">
                     <label className="block text-sm font-medium text-gray-700">
                       Price (Bag)
                     </label>
@@ -688,7 +704,7 @@ const PurchaseModal = ({
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
                     />
-                  </div>
+                  </div> */}
                 </>
               )}
 
@@ -758,7 +774,7 @@ const PurchaseModal = ({
                   disabled={!selectedProduct}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Due Amount

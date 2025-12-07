@@ -206,7 +206,7 @@ const AddSale = () => {
     const items = [...saleItems];
     const item = items[index];
     const product = item.productDetails;
-
+    
     if (name === 'product') {
       const newProduct = products.find(p => p._id === value);
       items[index] = {
@@ -249,7 +249,7 @@ const AddSale = () => {
         } else if (name === 'displayQuantity') {
           baseValue = product.unitCategory === 'tray' ? enteredValue * 7 : enteredValue * 40;
         } else if (name === 'bagQuantity') {
-          baseValue = enteredValue * 50;
+          baseValue = enteredValue/50;
         }
 
         if (baseValue > available) {
@@ -261,7 +261,7 @@ const AddSale = () => {
         if (product.unitCategory === 'KG') {
           item.displayQuantity = (newQuantityInBase / 40).toString();
         } else if (product.unitCategory === 'bag') {
-          item.bagQuantity = (newQuantityInBase).toString();
+          item.bagQuantity = (newQuantityInBase *50).toString();
         } else if (product.unitCategory === 'tray') {
           item.displayQuantity = (newQuantityInBase / 7).toString();
         }

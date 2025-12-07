@@ -179,7 +179,7 @@ const ReturnSale = () => {
 
                   {/* Quantity KG */}
                   <div>
-                    <label>Quantity (KG)</label>
+                    <label>Quantity ({latData?.unit === 'KG'? 'KG' : latData?.unit==='bag' ? 'BAG' : ''})</label>
                     <input
                       type="number"
                       value={item.quantity}
@@ -208,7 +208,7 @@ const ReturnSale = () => {
                   <div>
                     <label>Unit Price</label>
                     <input
-                      type="number"
+                      type="text"
                       value={item.unitPrice}
                       disabled
                       className="w-full border px-3 py-2 bg-gray-100"
@@ -216,7 +216,7 @@ const ReturnSale = () => {
                   </div>
 
                   {/* Bags */}
-                  <div>
+                  {latData?.unit === 'KG' && <div>
                     <label>Total Bags</label>
                     <input
                       type="text"
@@ -224,7 +224,16 @@ const ReturnSale = () => {
                       onChange={(e) => handleBagChange(index, e.target.value)}
                       className="w-full border px-3 py-2 rounded"
                     />
-                  </div>
+                  </div>}
+                  {latData?.unit === 'bag' && <div>
+                    <label>Total KG</label>
+                    <input
+                      type="text"
+                      value={item.quantity *50}
+                      disabled
+                      className="w-full border px-3 py-2 rounded"
+                    />
+                  </div>}
 
                   {/* Total Amount */}
                   <div>
@@ -253,15 +262,15 @@ const ReturnSale = () => {
                 <div className="bg-red-100 px-2 py-1 mt-2 rounded">
                   {latData?.latNumber && (
                     <p className="text-sm italic">
-                      Lot: {latData.latNumber}, Pending: {latData.pendingQuantity} KG (
-                      {latData.pendingQuantity / 40} mon), Bags: {latData.pendingBag}
+                      Lot: {latData.latNumber}, Pending: {latData.pendingQuantity}{ latData?.unit === 'KG' ? 'KG' :  latData?.unit === 'bag' ? ' BAG' : ''} (
+                      {latData?.unit === 'KG' ?`${latData.pendingQuantity / 40 }mon`: latData?.unit === 'bag' ?`${latData.pendingQuantity *50}KG`:''} ) {latData?.unit === 'KG' && ` , Bags: ${latData.pendingBag}`}
                     </p>
                   )}
                 </div>
 
                 {/* RETURN QTY DISPLAY */}
                 <p className="text-blue-600 text-sm mt-1 font-semibold">
-                  Returned Qty: {item.originalQty} KG
+                  Returned Qty: {item.quantity} KG
                 </p>
               </div>
             );

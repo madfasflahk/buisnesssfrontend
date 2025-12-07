@@ -55,7 +55,7 @@ const SaleItem = ({
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
             required
           >
-            <option value="">Select a product</option>
+            {!item.product &&<option value="">Select a product</option>}
             {products.map((product) => (
               <option key={product._id} value={product._id}>
                 {product.name} ({product.unitCategory})
@@ -81,7 +81,7 @@ const SaleItem = ({
                 <div className="text-xs text-gray-500 mt-1">{lot.supplier}</div>
                 <div className="text-xs text-gray-500">{new Date(lot.date).toLocaleDateString()}</div>
                 <div className="mt-1 text-xs font-bold text-blue-600">
-                  {lot.pendingQuantity + ' ' + (lot.unit || '')}{lot.unit==='KG' && `/ ${lot.pendingQuantity/40} mon`} {lot.pendingBags && `(${lot.pendingBags} bags)`}
+                  {lot.pendingQuantity + ' ' + (lot.unit || '')}{lot.unit==='KG' && `/ ${lot.pendingQuantity/40} mon`} {lot.pendingBags &&<> {lot.unit==='KG' ? `(${lot.pendingBags} bags)`:lot.unit==='bag'?`(${lot.pendingQuantity *50} kg)`:''}</>}
                 </div>
               </button>
             ))}
@@ -95,7 +95,7 @@ const SaleItem = ({
           <div className="flex items-center justify-between gap-2 p-2 bg-green-50 rounded-md border border-green-200">
             <div className="text-sm">
               <span className="font-semibold text-green-800">Lot:</span> {item.lot.latNumber} ({item.lot.supplier})
-              <span className="ml-3 text-green-700">Available: {item.lot.pendingQuantity} {item.productDetails?.unitCategory} / {item.productDetails?.unitCategory==="KG" && `${item.lot.pendingQuantity/40} mon /`} <span className='capitalize'>{item.lot.pendingBags} bags  </span></span>
+              <span className="ml-3 text-green-700">Available: {item.lot.pendingQuantity} {item.productDetails?.unitCategory} / {item.productDetails?.unitCategory==="KG" && `${item.lot.pendingQuantity/40} mon /`} <span className='capitalize'>{item.productDetails?.unitCategory==="KG"? `${item.lot.pendingBags} bags`:item.productDetails?.unitCategory==="bag"?`${item.lot.pendingQuantity *50} kg`:``}   </span></span>
             </div>
             <button
               type="button"
@@ -155,27 +155,34 @@ const SaleItem = ({
             {item.productDetails?.unitCategory === 'bag' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Quantity (kg)</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Quantity (bag)</label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     name="quantity"
-                    value={item.quantity * 50}
-                    onChange={(e) => handleItemChange(index, e)}
+                    value={item.quantity}
+                    onChange={(e) =>{
+                      
+                      if(/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)
+                    
+                    }}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     required
                     step="0.1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">Quantity (bag)</label>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Quantity (kg)</label>
                   <div className="flex">
                     <input
-                      type="number"
+                      type="text"
+                      inputMode='decimal'
                       name="bagQuantity"
                       value={item.bagQuantity}
-                      onChange={(e) => handleItemChange(index, e)}
+                      onChange={(e) =>{ 
+                        if(/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)}}
                       className="w-full p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      step="0.1"
+                      
                     />
                     <span className="inline-flex items-center px-2 text-sm text-gray-600 bg-gray-100 border border-l-0 border-gray-300 rounded-r-md">
                       bag
