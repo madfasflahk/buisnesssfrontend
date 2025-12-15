@@ -28,7 +28,7 @@ const SaleItem = ({
   handleRemoveItem,
 }) => {
 
-  console.log('Rendering SaleItem:',item.lot);  
+  console.log('Rendering SaleItem:', item.lot);
   return (
     <div key={index} className="bg-white p-4 rounded-lg shadow-md border border-gray-200 relative">
       <div className="flex justify-between items-start mb-3">
@@ -40,11 +40,11 @@ const SaleItem = ({
             onClick={() => handleRemoveItem(index)}
             className="text-red-500 hover:text-red-700 transition-colors p-1 rounded-full hover:bg-red-50"
           >
-            <FaTrash size={14} /> 
+            <FaTrash size={14} />
           </button>
         )}
       </div>
-        
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
         <div>
           <label className="block text-sm font-medium text-gray-600 mb-1">Product</label>
@@ -55,7 +55,7 @@ const SaleItem = ({
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
             required
           >
-            {!item.product &&<option value="">Select a product</option>}
+            {!item.product && <option value="">Select a product</option>}
             {products.map((product) => (
               <option key={product._id} value={product._id}>
                 {product.name} ({product.unitCategory})
@@ -81,7 +81,7 @@ const SaleItem = ({
                 <div className="text-xs text-gray-500 mt-1">{lot.supplier}</div>
                 <div className="text-xs text-gray-500">{new Date(lot.date).toLocaleDateString()}</div>
                 <div className="mt-1 text-xs font-bold text-blue-600">
-                  {lot.pendingQuantity + ' ' + (lot.unit || '')}{lot.unit==='KG' && `/ ${lot.pendingQuantity/40} mon`} {lot.pendingBags &&<> {lot.unit==='KG' ? `(${lot.pendingBags} bags)`:lot.unit==='bag'?`(${lot.pendingQuantity *50} kg)`:''}</>}
+                  {lot.pendingQuantity + ' ' + (lot.unit || '')}{lot.unit === 'KG' && `/ ${lot.pendingQuantity / 40} mon`} {lot.pendingBags && <> {lot.unit === 'KG' ? `(${lot.pendingBags} bags)` : lot.unit === 'bag' ? `(${lot.pendingQuantity * 50} kg)` : ''}</>}
                 </div>
               </button>
             ))}
@@ -94,9 +94,39 @@ const SaleItem = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-2 p-2 bg-green-50 rounded-md border border-green-200">
             <div className="text-sm">
-              <span className="font-semibold text-green-800">Lot:</span> {item.lot.latNumber} ({item.lot.supplier})
-              <span className="ml-3 text-green-700">Available: {item.lot.pendingQuantity} {item.productDetails?.unitCategory} / {item.productDetails?.unitCategory==="KG" && `${item.lot.pendingQuantity/40} mon /`} <span className='capitalize'>{item.productDetails?.unitCategory==="KG"? `${item.lot.pendingBags} bags`:item.productDetails?.unitCategory==="bag"?`${item.lot.pendingQuantity *50} kg`:``}   </span></span>
+              <span className="font-semibold text-green-800">Lot:</span>{" "}
+              {item.lot.latNumber} ({item.lot.supplier})
+
+              <span className="ml-3 text-green-700">
+                Available: {item.lot.pendingQuantity} {item.productDetails?.unitCategory}
+                {" / "}
+
+                {/* KG */}
+                {item.productDetails?.unitCategory === "KG" && (
+                  <>
+                    {item.lot.pendingQuantity / 40} mon /{" "}
+                    <span className="capitalize">
+                      {item.lot.pendingBags} bags
+                    </span>
+                  </>
+                )}
+
+                {/* bag */}
+                {item.productDetails?.unitCategory === "bag" && (
+                  <span className="capitalize">
+                    {item.lot.pendingQuantity * 50} kg
+                  </span>
+                )}
+
+                {/* tray */}
+                {item.productDetails?.unitCategory === "tray" && (
+                  <span className="capitalize">
+                    {item.lot.pendingQuantity / 7} peti
+                  </span>
+                )}
+              </span>
             </div>
+
             <button
               type="button"
               onClick={() => handleRemoveLot(index)}
@@ -161,10 +191,10 @@ const SaleItem = ({
                     inputMode="decimal"
                     name="quantity"
                     value={item.quantity}
-                    onChange={(e) =>{
-                      
-                      if(/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)
-                    
+                    onChange={(e) => {
+
+                      if (/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)
+
                     }}
                     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     required
@@ -179,10 +209,11 @@ const SaleItem = ({
                       inputMode='decimal'
                       name="bagQuantity"
                       value={item.bagQuantity}
-                      onChange={(e) =>{ 
-                        if(/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)}}
+                      onChange={(e) => {
+                        if (/^\d*\.?\d*$/.test(e.target.value)) handleItemChange(index, e)
+                      }}
                       className="w-full p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                      
+
                     />
                     <span className="inline-flex items-center px-2 text-sm text-gray-600 bg-gray-100 border border-l-0 border-gray-300 rounded-r-md">
                       bag
@@ -194,7 +225,7 @@ const SaleItem = ({
 
             {item.productDetails?.unitCategory === 'tray' && (
               <>
-              <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">Quantity (peti)</label>
                   <div className="flex">
                     <input
@@ -220,47 +251,47 @@ const SaleItem = ({
                     required
                   />
                 </div>
-                
+
               </>
             )}
 
             {/* Different unit price inputs based on the product's unit category. */}
             {item.productDetails?.unitCategory === 'KG' && (
               <>
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (mon)</label>
-                <input
-                  type="text"
-                  name="unitPriceMon"
-                  value={item.unitPriceMon}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow only numbers and decimal points
-                    if (/^\d*\.?\d*$/.test(value)) {
-                      handleItemChange(index, e);
-                    }
-                  }}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (mon)</label>
+                  <input
+                    type="text"
+                    name="unitPriceMon"
+                    value={item.unitPriceMon}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numbers and decimal points
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        handleItemChange(index, e);
+                      }
+                    }}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
 
-              </div>
-               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (KG)</label>
-                <input
-                  type="text"
-                  name="unitPriceKG"
-                  value={item.unitPriceKG}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Allow only numbers and decimal points
-                    if (/^\d*\.?\d*$/.test(value)) {
-                      handleItemChange(index, e);
-                    }
-                  }}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (KG)</label>
+                  <input
+                    type="text"
+                    name="unitPriceKG"
+                    value={item.unitPriceKG}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow only numbers and decimal points
+                      if (/^\d*\.?\d*$/.test(value)) {
+                        handleItemChange(index, e);
+                      }
+                    }}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
 
-              </div>
+                </div>
               </>
             )}
 
@@ -280,7 +311,7 @@ const SaleItem = ({
 
             {item.productDetails?.unitCategory === 'tray' && (
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (peti)</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Unit Price (tray)</label>
                 <input
                   type="text"
                   name="unitPricePeti"
