@@ -159,7 +159,7 @@ const ReturnSale = () => {
 
           {formData.products.map((item, index) => {
             const latData = saleDetails.products[index].latId;
-            console.log('LAT DATA:', latData,item);
+            console.log('LAT DATA:', latData, item);
             return (
               <div key={index} className="border-b pb-4 mb-4">
 
@@ -179,7 +179,7 @@ const ReturnSale = () => {
 
                   {/* Quantity KG */}
                   <div>
-                    <label>Quantity ({latData?.unit === 'KG'? 'KG' : latData?.unit==='bag' ? 'BAG' : ''})</label>
+                    <label>Quantity ({latData?.unit === 'KG' ? 'KG' : latData?.unit === 'bag' ? 'BAG' : latData?.unit === 'tray'?"Tray":""})</label>
                     <input
                       type="number"
                       value={item.quantity}
@@ -229,7 +229,7 @@ const ReturnSale = () => {
                     <label>Total KG</label>
                     <input
                       type="text"
-                      value={item.quantity *50}
+                      value={item.quantity * 50}
                       disabled
                       className="w-full border px-3 py-2 rounded"
                     />
@@ -262,15 +262,23 @@ const ReturnSale = () => {
                 <div className="bg-red-100 px-2 py-1 mt-2 rounded">
                   {latData?.latNumber && (
                     <p className="text-sm italic">
-                      Lot: {latData.latNumber}, Pending: {latData.pendingQuantity}{ latData?.unit === 'KG' ? 'KG' :  latData?.unit === 'bag' ? ' BAG' : ''} (
-                      {latData?.unit === 'KG' ?`${latData.pendingQuantity / 40 }mon`: latData?.unit === 'bag' ?`${latData.pendingQuantity *50}KG`:''} ) {latData?.unit === 'KG' && ` , Bags: ${latData.pendingBag}`}
+                      Lot: {latData.latNumber}, Pending: {latData.pendingQuantity}{latData?.unit === 'KG' ? 'KG' : latData?.unit === 'bag' ? ' BAG' : latData?.unit === 'tray' ? ' Tray' : ''} (
+                      {latData?.unit === 'KG'
+                        ? `${(latData.pendingQuantity / 40).toFixed(2)} mon`
+                        : latData?.unit === 'bag'
+                          ? `${latData.pendingQuantity * 50} KG`
+                          : latData?.unit === 'tray'
+                            ? `${(latData.pendingQuantity / 7).toFixed(2)} peti`
+                            : ''
+                      }
+                      )
                     </p>
                   )}
                 </div>
 
                 {/* RETURN QTY DISPLAY */}
                 <p className="text-blue-600 text-sm mt-1 font-semibold">
-                  Returned Qty: {item.quantity} KG
+                  Returned Qty: {item.quantity} {latData?.unit === 'KG' ? "Kg" : latData?.unit === 'bag' ? 'Bag' : latData?.unit === 'tray' ? 'Tray' : ''}
                 </p>
               </div>
             );

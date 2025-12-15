@@ -74,7 +74,7 @@ const Purchase = () => {
         return `${formatNumber(quantity)} kg (${formatNumber(quantity / KG_PER_MON)} mon)`;
       case 'tray':
         return `${formatNumber(quantity)} tray (${formatNumber(quantity / TRAY_PER_PATI)} pati)`;
-      case 'Bag':
+      case 'bag':
         return `${formatNumber(quantity)} bag (${formatNumber(quantity * KG_PER_BAG)} kg)`;
       default:
         return formatNumber(quantity);
@@ -91,20 +91,20 @@ const Purchase = () => {
         return `₹${formatNumber(price) * 40} / mon`;
       case 'tray':
         return `₹${formatNumber(price) * 7} / Pt`;
-      case 'Bag':
+      case 'bag':
         return `₹${formatNumber(price)}/bag`;
       default:
         return `₹${formatNumber(price)}`;
     }
   };
   const formatPriceDisplay = (price, productId) => {
-
+    console.log(productId)
     switch (productId) {
       case 'KG':
         return `₹${formatNumber(price)} / Kg`;
       case 'tray':
         return `₹${formatNumber(price)} / Tr`;
-      case 'Bag':
+      case 'bag':
         return `₹${formatNumber(price)}/Bag`;
       default:
         return `₹${formatNumber(price)}`;
