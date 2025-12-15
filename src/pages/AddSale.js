@@ -247,6 +247,7 @@ const AddSale = () => {
 
          
         } else if (name === 'displayQuantity') {
+          
           baseValue = product.unitCategory === 'tray' ? enteredValue * 7 : enteredValue * 40;
         } else if (name === 'bagQuantity') {
           baseValue = enteredValue/50;
@@ -288,7 +289,8 @@ const AddSale = () => {
         } else if (name === 'unitPriceBag') {
           item.unitPrice = (priceValue).toFixed(2);
         } else if (name === 'unitPricePeti') {
-          item.unitPrice = (priceValue / 7).toFixed(2);
+          item.unitPrice = (priceValue).toFixed(2);
+
         } else if (name === 'unitPriceKG') {
           item.unitPrice = priceValue.toFixed(2);
           item.unitPriceMon = (priceValue * 40).toFixed(2);
