@@ -235,12 +235,46 @@ const PurchaseModal = ({
     handleInputChange,
   ]);
 
+  // This useEffect updates the per-mon/pati/bag price inputs when Price_PerUnit changes.
+  useEffect(() => {
+    const pricePerUnit = parseFloat(newPurchase.Price_PerUnit);
+
+    if (!isNaN(pricePerUnit)) {
+      let newPriceInputs = { ...priceInputs };
+      switch (unitCategory) {
+        case "KG":
+          newPriceInputs.pricePerMon = formatNumber(pricePerUnit * KG_PER_MON);
+          break;
+        case "tray":
+          newPriceInputs.pricePerPati = formatNumber(
+            pricePerUnit * TRAY_PER_PATI
+          );
+          break;
+        case "bag":
+          newPriceInputs.pricePerBag = formatNumber(pricePerUnit * KG_PER_BAG);
+          break;
+        default:
+          break;
+      }
+      setPriceInputs(newPriceInputs);
+    } else {
+      // If Price_PerUnit is cleared, clear the specific price inputs
+      if (unitCategory === "KG") {
+        setPriceInputs((prev) => ({ ...prev, pricePerMon: "" }));
+      } else if (unitCategory === "tray") {
+        setPriceInputs((prev) => ({ ...prev, pricePerPati: "" }));
+      } else if (unitCategory === "bag") {
+        setPriceInputs((prev) => ({ ...prev, pricePerBag: "" }));
+      }
+    }
+  }, [newPurchase.Price_PerUnit, unitCategory]);
+
   // Handle price input changes with proper decimal handling
   const handlePriceInputChange = (e, unitType) => {
     const { value } = e.target;
     const processedValue = handleDecimalInput(value);
 
-    // Update the input state
+    // Update the input state for the field being changed
     setPriceInputs((prev) => ({
       ...prev,
       [unitType]: processedValue,
@@ -265,13 +299,21 @@ const PurchaseModal = ({
       }
 
       handleInputChange({
-        target: { name: "Price_PerUnit", value: pricePerUnit },
+        target: { name: "Price_PerUnit", value: pricePerUnit.toString() },
       });
     } else if (processedValue === "") {
       handleInputChange({
         target: { name: "Price_PerUnit", value: "" },
       });
     }
+  };
+
+  const handlePricePerUnitChange = (e) => {
+    const { value } = e.target;
+    const processedValue = handleDecimalInput(value);
+    handleInputChange({
+      target: { name: "Price_PerUnit", value: processedValue },
+    });
   };
 
   const handleProductSelect = (product) => {
@@ -582,12 +624,13 @@ const PurchaseModal = ({
                       Quantity (tray)
                     </label>
                     <input
-                      type="number"
-                      step="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={convertedValues.tray}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        if(/^\d*\.?\d*$/.test(e.target.value))
                         handleUnitConversion("tray", e.target.value)
-                      }
+                      }}
                       placeholder="Quantity in tray"
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
@@ -599,11 +642,12 @@ const PurchaseModal = ({
                     </label>
                     <input
                       type="text"
-                      step="0.01"
+                      inputMode="decimal"
                       value={convertedValues.pati}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        if(/^\d*\.?\d*$/.test(e.target.value))    
                         handleUnitConversion("pati", e.target.value)
-                      }
+                      }}
                       placeholder="Quantity in pati"
                       className="w-full border px-3 py-2 rounded"
                       disabled={!selectedProduct}
@@ -616,10 +660,12 @@ const PurchaseModal = ({
                     <input
                       type="text"
                       value={priceInputs.pricePerPati}
-                      onChange={(e) =>
-                        
-                        handlePriceInputChange(e, "pricePerPati")
-                      }
+                      inputMode="decimal"
+                      onChange={(e) => {
+                        if (/^\d*\.?\d*$/.test(e.target.value)) {
+                          handlePriceInputChange(e, "pricePerPati");
+                        }
+                      }}
                       
                       placeholder="Price per pati"
                       className="w-full border px-3 py-2 rounded"
@@ -735,11 +781,11 @@ const PurchaseModal = ({
                   {getUnitLabel()}
                 </label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   name="Price_PerUnit"
-                  value={formatNumber(newPurchase.Price_PerUnit)}
-                  onChange={handleInputChange}
+                  value={newPurchase.Price_PerUnit}
+                  onChange={handlePricePerUnitChange}
                   placeholder={getUnitLabel()}
                   className="w-full border px-3 py-2 rounded"
                   disabled={!selectedProduct}
