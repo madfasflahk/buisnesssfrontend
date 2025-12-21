@@ -121,7 +121,7 @@ const Customer = () => {
         ThClass: "justify-center",
         Cell: ({ row }) => (
           <div className="flex gap-2 justify-center ">
-            <button onClick={() => navigate(`/customer-sale-list/${row.original._id}`)} className="text-primary-600 hover:text-primary-800">
+            <button onClick={() => navigate(`/customer-sale-list/${row.original.name}/${row.original._id}`)} className="text-primary-600 hover:text-primary-800">
               <FaLongArrowAltRight />
             </button>
           </div>

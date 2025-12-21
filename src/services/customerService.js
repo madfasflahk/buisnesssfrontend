@@ -27,8 +27,8 @@ const deleteCustomerById = async (id) => {
   return response.data;
 };
 
-const getCustomerSaleList = async (customerId) => {
-  const response = await axios.get(`${API_URL}/api/sales/customerSaleList/${customerId}`);
+const getCustomerSaleList = async ({ customerId, page = 1 }) => {
+  const response = await axios.get(`${API_URL}/api/users/saledetailse/${customerId}?page=${page}`);
   return response.data;
 }
 

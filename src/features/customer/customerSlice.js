@@ -89,9 +89,9 @@ export const deleteCustomerById = createAsyncThunk(
 
 export const getCustomerSaleList = createAsyncThunk(
   'customer/getSaleList',
-  async (customerId, thunkAPI) => {
+  async ({ customerId, page }, thunkAPI) => {
     try {
-      return await customerService.getCustomerSaleList(customerId);
+      return await customerService.getCustomerSaleList({ customerId, page });
     } catch (error) {
       const message =
         (error.response &&
@@ -106,7 +106,9 @@ export const getCustomerSaleList = createAsyncThunk(
 
 const initialState = {
   data: [],
-  saleList: [],
+  customareSaleList: [],
+  totalDue: 0,
+  pagination: {},
   loading: false,
   error: null,
 };
@@ -179,7 +181,9 @@ const customerSlice = createSlice({
       })
       .addCase(getCustomerSaleList.fulfilled, (state, action) => {
         state.loading = false;
-        state.saleList = action.payload;
+        state.customareSaleList = action.payload.ledger;
+        state.totalDue = action.payload.totalDue;
+        state.pagination = action.payload.pagination;
       })
       .addCase(getCustomerSaleList.rejected, (state, action) => {
         state.loading = false;

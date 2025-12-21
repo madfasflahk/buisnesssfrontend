@@ -12,7 +12,14 @@ export const apiSlice = createApi({
         body: credentials,
       }),
     }),
+    salePayment: builder.mutation({
+      query: ({ customerId, ...paymentData }) => ({
+        url: `api/salePayment/${customerId}`,
+        method: 'POST',
+        body: paymentData,
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation } = apiSlice;
+export const { useLoginMutation, useSalePaymentMutation } = apiSlice;
